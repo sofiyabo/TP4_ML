@@ -4,17 +4,24 @@ import numpy as np
 def pca_fit(X_std, n_components=None):
     """
     Aprende la transformación PCA sobre X_std (ya estandarizado).
+    Mantiene float32 para evitar picos de memoria.
     """
-    # Matriz de covarianza
-    cov = np.cov(X_std.T)  # shape: (784, 784)
+    N = X_std.shape[0]
     
-    # Autovalores y autovectores
-    eigenvalues, eigenvectors = np.linalg.eigh(cov)
+    # Calcular covarianza manualmente en float32 
+    X32 = X_std.astype(np.float32)
+    mean = X32.mean(axis=0)
+    X_centered = X32 - mean                        # (N, 784) float32
+    cov = (X_centered.T @ X_centered) / (N - 1)   # (784, 784) float32
+    del X_centered                                 # liberar inmediatamente
     
-    # Ordenar de mayor a menor varianza
+    # eigh para matrices simétricas
+    eigenvalues, eigenvectors = np.linalg.eigh(cov.astype(np.float64)) 
+    
+    # Ordenar de mayor a menor
     orden = np.argsort(eigenvalues)[::-1]
     eigenvalues  = eigenvalues[orden]
-    eigenvectors = eigenvectors[:, orden]
+    eigenvectors = eigenvectors[:, orden].astype(np.float32)
     
     if n_components is not None:
         eigenvalues  = eigenvalues[:n_components]

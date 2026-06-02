@@ -1,16 +1,28 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_images(df, n_images=10):
-    pixel_cols = [c for c in df.columns if c.startswith("pixel_")]
-    sample = df.sample(n=n_images).reset_index(drop=True)
-
-    plt.figure(figsize=(10, 10))
-    for i in range(n_images):
-        img = sample.loc[i, pixel_cols].values.reshape(28, 28)
-        plt.subplot(1, n_images, i+1)
-        plt.imshow(img, cmap="gray")
-        plt.axis("off")
+def plot_images(data, n_images=10, titles=None, n_cols=None):
+    if isinstance(data, pd.DataFrame):
+        pixel_cols = [c for c in data.columns if c.startswith("pixel_")]
+        data = data[pixel_cols].values
+    
+    if not isinstance(data, list):
+        data = [data]
+    
+    n_cols = n_cols or n_images
+    idx = np.random.choice(len(data[0]), n_images, replace=False)
+    
+    fig, axes = plt.subplots(len(data), n_cols, figsize=(n_cols * 1.5, len(data) * 1.8), squeeze=False)
+    
+    for row, arr in enumerate(data):
+        for col, img in enumerate(arr[idx]):
+            axes[row, col].imshow(img.reshape(28, 28), cmap="gray")
+            axes[row, col].axis("off")
+        if titles and row < len(titles):
+            axes[row, 0].set_ylabel(titles[row], fontsize=11, rotation=0, labelpad=60, va="center")
+    
+    plt.tight_layout()
     plt.show()
 
 def barplot(labels, counts):
