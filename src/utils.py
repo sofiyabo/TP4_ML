@@ -2,28 +2,71 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_images(data, n_images=10, titles=None, n_cols=None):
+def plot_images(data, n_images=10, row_labels=None, titles=None, fixed_idx=None, n_cols=None):
     if isinstance(data, pd.DataFrame):
         pixel_cols = [c for c in data.columns if c.startswith("pixel_")]
         data = data[pixel_cols].values
-    
-    if not isinstance(data, list):
+
+    if n_cols is not None:
+        n_images = n_cols
+
+    single = not isinstance(data, list)
+    if single:
         data = [data]
-    
-    n_cols = n_cols or n_images
-    idx = np.random.choice(len(data[0]), n_images, replace=False)
-    
-    fig, axes = plt.subplots(len(data), n_cols, figsize=(n_cols * 1.5, len(data) * 1.8), squeeze=False)
-    
-    for row, arr in enumerate(data):
-        for col, img in enumerate(arr[idx]):
-            axes[row, col].imshow(img.reshape(28, 28), cmap="gray")
-            axes[row, col].axis("off")
-        if titles and row < len(titles):
-            axes[row, 0].set_ylabel(titles[row], fontsize=11, rotation=0, labelpad=60, va="center")
-    
-    plt.tight_layout()
+
+    n_rows = len(data)
+    idx = fixed_idx if fixed_idx is not None else np.random.choice(len(data[0]), n_images, replace=False)
+
+    has_labels = row_labels is not None and len(row_labels) > 0
+
+    # Si hay etiquetas de fila, agregamos una columna extra a la izquierda para ellas
+    total_cols = n_images + 1 if has_labels else n_images
+    label_col_width = 1.2  # ancho de la columna de etiquetas
+    img_col_width = 1.5
+
+    fig_width = (label_col_width if has_labels else 0) + n_images * img_col_width
+    fig_height = n_rows * 1.8
+
+    # width_ratios: columna de etiqueta angosta + n_images columnas iguales
+    if has_labels:
+        width_ratios = [label_col_width] + [img_col_width] * n_images
+    else:
+        width_ratios = [img_col_width] * n_images
+
+    fig, axes = plt.subplots(
+        nrows=n_rows,
+        ncols=total_cols,
+        figsize=(fig_width, fig_height),
+        gridspec_kw={"width_ratios": width_ratios} if has_labels else {},
+        squeeze=False
+    )
+
+    for row_i, arr in enumerate(data):
+        # Columna 0: etiqueta de fila
+        if has_labels:
+            ax_label = axes[row_i, 0]
+            ax_label.axis("off")
+            label = row_labels[row_i] if row_i < len(row_labels) else ""
+            ax_label.text(
+                0.95, 0.5, label,
+                ha="right", va="center",
+                fontsize=10, fontweight="bold",
+                transform=ax_label.transAxes
+            )
+
+        # Columnas de imágenes
+        for col_i in range(n_images):
+            ax = axes[row_i, col_i + (1 if has_labels else 0)]
+            ax.imshow(arr[idx[col_i]].reshape(28, 28), cmap="gray")
+            ax.axis("off")
+
+            # Título de clase encima, solo en primera fila
+            if titles is not None and row_i == 0 and col_i < len(titles):
+                ax.set_title(titles[col_i], fontsize=8, pad=3)
+
+    plt.tight_layout(pad=0.5)
     plt.show()
+    return idx
 
 def barplot(labels, counts):
     plt.figure(figsize=(10, 4))
@@ -69,7 +112,7 @@ def standarization(X_train, X_test):
     media = np.mean(X_train, axis=0)   # media de cada pixel (shape: 784,)
     desvio = np.std(X_train, axis=0)   # desvío de cada pixel (shape: 784,)
     
-    # Evitar división por cero en píxeles constantes (ej: fondo negro)
+    # Evitar división por cero en píxeles constantes 
     desvio[desvio == 0] = 1
     
     X_train_std = (X_train - media) / desvio

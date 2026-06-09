@@ -3,18 +3,16 @@ import numpy as np
 def kmeans(X, K, max_iter=300, tol=1e-4, random_seed=42, n_init=10):
     """
     Corre K-Means n_init veces y devuelve el resultado con menor inercia.
-    Inicialización K-Means++ para evitar mínimos locales malos.
     """
     best_labels, best_centroids, best_inertia = None, None, np.inf
 
     for run in range(n_init):
         rng = np.random.default_rng(random_seed + run)
 
-        # ── K-Means++ initialization 
         first = rng.integers(0, len(X))
         centroids = [X[first]]
         for _ in range(K - 1):
-            C = np.array(centroids)  # shape (n_elegidos, D)
+            C = np.array(centroids) 
             D2 = np.min(np.sum((X[:, None] - C[None, :]) ** 2, axis=2), axis=1)
             probs = D2 / D2.sum()
             centroids.append(X[rng.choice(len(X), p=probs)])
@@ -43,8 +41,7 @@ def kmeans(X, K, max_iter=300, tol=1e-4, random_seed=42, n_init=10):
 
 def gmm(X, K, max_iter=300, tol=1e-4, random_seed=42, reg_covar=1e-2):
     """
-    reg_covar aumentado a 1e-2 (antes 1e-6): estabiliza covarianzas en alta dimensión.
-    tol aflojada a 1e-4 (antes 1e-6): converge antes sin perder calidad.
+    Algoritmo GMM inicializado con KMeans.
     """
     np.random.seed(random_seed)
     N, D = X.shape
@@ -113,12 +110,11 @@ def silhouette_score(X, labels):
     N = len(X)
     clusters = np.unique(labels)
 
-    # Matriz de distancias (N, N) sin materializar (N, N, D)
-    # ||x - y||² = ||x||² + ||y||² - 2 x·y
-    sq = (X ** 2).sum(axis=1)                          # (N,)
+    # Matriz de distancias
+    sq = (X ** 2).sum(axis=1)   
     dist = np.sqrt(
         np.maximum(sq[:, None] + sq[None, :] - 2 * X @ X.T, 0.0)
-    )                                                   # (N, N)
+    )           
 
     a = np.zeros(N)
     b = np.full(N, np.inf)
@@ -130,7 +126,7 @@ def silhouette_score(X, labels):
 
         # a(i) para los puntos del cluster k — vectorizado
         if size > 1:
-            intra = dist[np.ix_(idx, idx)]              # (size, size)
+            intra = dist[np.ix_(idx, idx)]  
             a[idx] = intra.sum(axis=1) / (size - 1)
         # else a[i] queda 0
 
@@ -139,7 +135,7 @@ def silhouette_score(X, labels):
             if other == k:
                 continue
             other_idx = np.where(labels == other)[0]
-            mean_inter = dist[np.ix_(idx, other_idx)].mean(axis=1)  # (size,)
+            mean_inter = dist[np.ix_(idx, other_idx)].mean(axis=1) 
             b[idx] = np.minimum(b[idx], mean_inter)
 
     s = (b - a) / np.maximum(a, b)

@@ -11,9 +11,9 @@ def pca_fit(X_std, n_components=None):
     # Calcular covarianza manualmente en float32 
     X32 = X_std.astype(np.float32)
     mean = X32.mean(axis=0)
-    X_centered = X32 - mean                        # (N, 784) float32
-    cov = (X_centered.T @ X_centered) / (N - 1)   # (784, 784) float32
-    del X_centered                                 # liberar inmediatamente
+    X_centered = X32 - mean   
+    cov = (X_centered.T @ X_centered) / (N - 1)
+    del X_centered   
     
     # eigh para matrices simétricas
     eigenvalues, eigenvectors = np.linalg.eigh(cov.astype(np.float64)) 
