@@ -37,7 +37,7 @@ def _binary_search_sigma(dist2_i, target_perplexity, max_iter=200, tol=1e-5):
         # Perplejidad actual
         perp = 2.0 ** H
 
-        # Ajustar beta según si la perplejidad es mayor o menor a la deseada
+        #ajustar beta
         diff = perp - target_perplexity
         if np.abs(diff) < tol:
             break
@@ -137,8 +137,6 @@ def tsne(X, n_components=2, perplexity=30, n_iter=500, lr=200.0,
     # Paso 3: gradient descent con momentum y early exaggeration
     for t in range(1, n_iter + 1):
 
-        # Early exaggeration: en las primeras iteraciones multiplicar P
-        # para que los clusters se separen más rápido
         if t <= exaggeration_iter:
             P_use    = P * early_exaggeration
             momentum = momentum_init

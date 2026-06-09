@@ -19,9 +19,8 @@ def plot_images(data, n_images=10, row_labels=None, titles=None, fixed_idx=None,
 
     has_labels = row_labels is not None and len(row_labels) > 0
 
-    # Si hay etiquetas de fila, agregamos una columna extra a la izquierda para ellas
     total_cols = n_images + 1 if has_labels else n_images
-    label_col_width = 1.2  # ancho de la columna de etiquetas
+    label_col_width = 1.2  
     img_col_width = 1.5
 
     fig_width = (label_col_width if has_labels else 0) + n_images * img_col_width

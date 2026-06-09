@@ -8,7 +8,7 @@ def pca_fit(X_std, n_components=None):
     """
     N = X_std.shape[0]
     
-    # Calcular covarianza manualmente en float32 
+    # Calcular covarianza
     X32 = X_std.astype(np.float32)
     mean = X32.mean(axis=0)
     X_centered = X32 - mean   
@@ -33,7 +33,7 @@ def pca_transform(X_std, eigenvectors):
     """
     Proyecta los datos sobre los componentes principales.
     """
-    return X_std @ eigenvectors  # shape: (n_samples, n_components)
+    return X_std @ eigenvectors  
 
 def pca_inverse(X_pca, eigenvectors, media, desvio):
     """
