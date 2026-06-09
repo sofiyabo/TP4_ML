@@ -109,14 +109,14 @@ def standarization(X_train, X_test):
     """
     Aprende media y desvío sobre train, aplica la transformación a ambos.
     """
-    media = np.mean(X_train, axis=0)   # media de cada pixel (shape: 784,)
-    desvio = np.std(X_train, axis=0)   # desvío de cada pixel (shape: 784,)
+    media = np.mean(X_train, axis=0)  
+    desvio = np.std(X_train, axis=0)  
     
     # Evitar división por cero en píxeles constantes 
     desvio[desvio == 0] = 1
     
     X_train_std = (X_train - media) / desvio
-    X_test_std  = (X_test  - media) / desvio  # usa la media/desvío del TRAIN
+    X_test_std = (X_test - media) / desvio
     
     return X_train_std, X_test_std, media, desvio
 

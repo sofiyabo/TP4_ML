@@ -108,7 +108,7 @@ def _compute_gradient(P, Q, Y, num):
     return grad
 
 
-def tsne(X, n_components=2, perplexity=30, n_iter=1000, lr=200.0,
+def tsne(X, n_components=2, perplexity=30, n_iter=500, lr=200.0,
          early_exaggeration=4.0, exaggeration_iter=250,
          momentum_init=0.5, momentum_final=0.8,
          random_seed=42, verbose=True):
@@ -125,7 +125,7 @@ def tsne(X, n_components=2, perplexity=30, n_iter=1000, lr=200.0,
         print(f"[t-SNE] n={n}, d={X.shape[1]}, perplexity={perplexity}, "
               f"n_iter={n_iter}, lr={lr}")
 
-    # Paso 1: calcular P (probabilidades conjuntas en alta dimensión)
+    # Paso 1: calcular P 
     P = _compute_joint_probabilities(X, perplexity)
 
     # Paso 2: inicializar embedding Y con ruido gaussiano pequeño
@@ -133,8 +133,6 @@ def tsne(X, n_components=2, perplexity=30, n_iter=1000, lr=200.0,
     Y_prev  = Y.copy()     # para momentum
     update  = np.zeros_like(Y)
 
-    if verbose:
-        print("[t-SNE] Iniciando optimización...")
 
     # Paso 3: gradient descent con momentum y early exaggeration
     for t in range(1, n_iter + 1):
